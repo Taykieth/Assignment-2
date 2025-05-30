@@ -1,0 +1,65 @@
+https://github.com/Taykieth/Assignment-2/new/main 
+
+import math
+
+def input_coordinates(label):https://
+    try:
+        x = float(input(f"Enter X{label}: "))
+        y = float(input(f"Enter Y{label}: "))
+        return x, y
+    except ValueError:
+        return None, None
+
+def decimal_to_dms(decimal_degrees):
+    degrees = int(decimal_degrees)
+    minutes_float = (decimal_degrees - degrees) * 60
+    minutes = int(minutes_float)
+    seconds = (minutes_float - minutes) * 60
+    return degrees, minutes, seconds
+
+def get_quadrant(angle_deg):
+    if 0 <= angle_deg < 90:
+        return "NE"
+    elif 90 <= angle_deg < 180:
+        return "SE"
+    elif 180 <= angle_deg < 270:
+        return "SW"
+    else:
+        return "NW"
+
+def main():
+    print("Join Computation Program Started")
+    
+    print("Enter coordinates of first point:")
+    X1, Y1 = input_coordinates("1")
+    print("Enter coordinates of second point:")
+    X2, Y2 = input_coordinates("2")
+
+    if None in (X1, Y1, X2, Y2):
+        print("Error: Invalid coordinate input")
+        print("Program Stopped")
+        return
+
+    delta_x = X2 - X1
+    delta_y = Y2 - Y1
+
+    r = math.hypot(delta_x, delta_y)
+
+    theta_radians = math.atan2(delta_y, delta_x)
+    theta_deg = math.degrees(theta_radians)
+
+    if theta_deg < 0:
+        theta_deg += 360
+
+    degrees, minutes, seconds = decimal_to_dms(theta_deg)
+    quadrant = get_quadrant(theta_deg)
+
+    print("Join between points:")
+    print(f"Distance (r): {r:.3f} units")
+    print(f"Direction (θ): {degrees}° {minutes}' {seconds:.2f}\"")
+    print(f"Compass Bearing: {degrees}° {minutes}' {seconds:.2f}\" {quadrant}")
+
+    print("Program Stopped")
+
+if __name__ == "__main__":
+    main()
