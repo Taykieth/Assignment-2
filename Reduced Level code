@@ -1,0 +1,125 @@
+https://github.com/Taykieth/Assignment-2/new/main
+
+import math
+
+def calculate_misclosure(initial_BM_RL, final_RL):
+    """Returns the misclosure: final RL - initial BM RL"""
+    return final_RL - initial_BM_RL
+
+def determine_allowable_misclosure(num_setups):
+    """Returns allowable misclosure using 0.005 * sqrt(num_setups)"""
+    return 0.005 * math.sqrt(num_setups)
+
+def adjust_all_RLs(RLs, misclosure, num_setups):
+    """Adjusts all RLs by distributing the misclosure equally"""
+    adjustment_per_setup = misclosure / num_setups
+    adjusted_RLs = []
+    for i, rl in enumerate(RLs):
+        # Distribute adjustment proportionally to point index
+        adjusted_rl = rl - adjustment_per_setup * (i + 1) / len(RLs)
+        adjusted_RLs.append(adjusted_rl)
+    return adjusted_RLs
+
+def display_all_RLs(RLs):
+    print("Point\tReduced Level (RL)")
+    for idx, rl in enumerate(RLs, start=1):
+        print(f"{idx}\t{rl:.3f}")
+
+def is_valid_number(val):
+    try:
+        float(val)
+        return True
+    except (ValueError, TypeError):
+        return False
+
+def main():
+    print("Reduced Level Computation Program Started")
+
+    # Input known benchmark data
+    while True:
+        try:
+            BM_RL = float(input("Enter known Reduced Level of Benchmark (BM_RL): "))
+            break
+        except ValueError:
+            print("Please enter a valid number for BM_RL.")
+
+    while True:
+        try:
+            BS = float(input("Enter Backsight reading on Benchmark (BS): "))
+            break
+        except ValueError:
+            print("Please enter a valid number for BS.")
+
+    # Calculate Height of Collimation (HPC)
+    HPC = BM_RL + BS
+    print(f"Calculated Height of Collimation (HPC): {HPC:.3f}")
+
+    if not is_valid_number(HPC):
+        print("Error: Invalid HPC calculation")
+        print("Program Stopped")
+        return
+
+    RLs = []
+    setups = 1
+    current_RL = None
+    more_points_to_survey = True
+
+    while more_points_to_survey:
+        # Get foresight reading for current point
+        while True:
+            try:
+                FS = float(input("Enter Foresight reading for current point (FS): "))
+                break
+            except ValueError:
+                print("Please enter a valid number for FS.")
+
+        # Calculate Reduced Level for current point
+        RL_current = HPC - FS
+        RLs.append(RL_current)
+        current_RL = RL_current
+        print(f"Reduced Level for current point: {RL_current:.3f}")
+
+        # Ask if instrument position is changing (new setup)
+        change_inst = input("Change instrument position? (y/n): ").strip().lower()
+        if change_inst == 'y':
+            setups += 1
+            while True:
+                try:
+                    new_BS = float(input("Enter Backsight for new instrument position: "))
+                    break
+                except ValueError:
+                    print("Please enter a valid number for new backsight (new_BS).")
+            HPC = RL_current + new_BS
+            print(f"New Height of Collimation (HPC): {HPC:.3f}")
+            if not is_valid_number(HPC):
+                print("Error in new HPC calculation")
+                print("Program Stopped")
+                return
+
+        # Ask if more points to survey
+        more = input("More points to survey? (y/n): ").strip().lower()
+        if more != 'y':
+            more_points_to_survey = False
+
+    # After completing survey loop
+    final_RL = RLs[-1]
+    misclosure = calculate_misclosure(BM_RL, final_RL)
+    allowable_misclosure = determine_allowable_misclosure(setups)
+    print(f"\nComputed misclosure: {misclosure:.4f}")
+    print(f"Allowable misclosure: {allowable_misclosure:.4f}")
+
+    # Check and adjust for misclosure
+    if abs(misclosure) > allowable_misclosure:
+        print("Misclosure exceeds allowable limit")
+        RLs = adjust_all_RLs(RLs, misclosure, setups)
+        print("Applied adjustment to RL values")
+    else:
+        print("Misclosure within allowable limits")
+
+    # Output final results
+    print("\nFinal Reduced Levels:")
+    display_all_RLs(RLs)
+    print("Program Stopped")
+
+if __name__ == "__main__":
+    main()
